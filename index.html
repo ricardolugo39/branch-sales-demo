@@ -136,9 +136,9 @@ table{border-collapse:collapse;width:100%}
 .demo-box{border:2px dashed #8A98A5;background:#fff;border-radius:8px;padding:10px 14px;font-size:13px;color:#33414E}
 .crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;font-size:13px;color:#33414E}
 .crumbs .lk{min-height:44px;padding:0 4px}
-.about{background:#fff;border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:10px;padding:14px 18px;max-width:760px}
-.about h2{font-size:15px}
-.about p{font-size:13px;margin-top:6px;color:#2A3742}
+.about{background:#fff;border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:8px;padding:8px 12px;margin-bottom:12px}
+.about summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--brand)}
+.about p{font-size:13px;margin-top:6px;color:#2A3742;max-width:80ch}
 .foot{font-size:12px;color:var(--muted)}
 details.ex{margin-top:10px;font-size:13px}
 details.ex summary{min-height:32px;display:flex;align-items:center;cursor:pointer;color:var(--brand);font-weight:600}
@@ -534,20 +534,20 @@ function monthSummary() {
 }
 
 function aboutPanel() {
-  return '<aside class="about" id="about" aria-labelledby="ab-h"><h2 id="ab-h">About this demo</h2>' +
-    '<p>I defined what a sales manager needed to decide, directed the design, and iterated on the prototype in Claude Design. I used Codex to implement and verify the internal version. One change I directed was moving monthly figures into a full-width summary with an expandable table so the amounts were easy to read.</p></aside>';
+  return '<details class="about" id="about"' + (aboutOpen ? ' open' : '') + '><summary data-fk="about">About this demo · How I designed it</summary>' +
+    '<p>I ran this as a short product design sprint. I started by defining what a sales manager needed to decide when opening the dashboard, then turned those priorities into a design brief. I used Claude Design to explore layouts and iterate on a clickable prototype, and Codex to implement the chosen direction in the internal app. I reviewed the working UI against the prototype on desktop and mobile, directed revisions where the two diverged, and verified the revised experience before approving the release.</p></details>';
 }
 
 function home() {
   return '<div class="head"><div><h1 id="view-title" tabindex="-1">Where should I intervene today?</h1>' +
     '<p class="sub">' + BRANCH + ' · Year to date: ' + PERIOD + ', vs the same elapsed dates in 2025 (' + PRIOR + ') · USD</p>' + ctxBar() + '</div>' +
     '<div class="ctrls"><button type="button" class="btn" data-act="sim" data-arg="Branch and period" data-fk="sel-b">Branch: <b>Lakeshore</b> ▾</button><button type="button" class="btn" data-act="sim" data-arg="Branch and period" data-fk="sel-p">Period: <b>Year to date</b> ▾</button></div></div>' +
-    kpis() + aiCard() +
+    aboutPanel() + kpis() + aiCard() +
     '<div class="sec">Decide where to act</div><div class="row2">' + customersCard() + teamCard() + '</div>' +
     '<div class="sec">Investigate the change</div><div class="row2e">' + trendCard() + brandCard() + '</div>' +
     '<div class="row2e">' + mixCard('family', 'Product-family mix', 'Share of net sales YTD, Lakeshore vs company. Diff = branch share minus company share, in percentage points.', FAM, 'family', 'View full family breakdown') +
     mixCard('segment', 'Customer-segment mix', 'Share of net sales YTD, top five segments plus Other. Shares of total net sales; segments plus the mapping issue add up to 100%.', SEG, 'segment', 'View full segment breakdown') + '</div>' +
-    aboutPanel() + '<p class="foot">Interactive demo · Fictional data · Data as of ' + AS_OF + '. Company, branch, customers, advisors, brands and figures are invented for this demo.</p>';
+    '<p class="foot">Interactive demo · Fictional data · Data as of ' + AS_OF + '. Company, branch, customers, advisors, brands and figures are invented for this demo.</p>';
 }
 
 function crumbsHtml() {
@@ -621,7 +621,10 @@ function detailView() {
 /* ---------------- render ---------------- */
 var app = document.getElementById('app'), live = document.getElementById('live');
 var lastLabel = '';
+var aboutOpen = false;
 function render() {
+  var about = document.getElementById('about');
+  if (about) aboutOpen = about.open;
   var act = document.activeElement, fk = act && act.getAttribute ? act.getAttribute('data-fk') : null;
   var y = window.scrollY;
   app.innerHTML = '<div class="shell">' + sidebar() + '<div class="col"><div class="topbar"><div class="brand"><span class="mark" aria-hidden="true">LS</span><b>Larkspur Supply</b></div>' +
