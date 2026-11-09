@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive demo · Fictional data — Branch Sales Command Center</title>
+<meta name="description" content="Interactive demo with fictional data: a sales manager's homepage that answers 'Where should I intervene today?'">
+<style>
+:root{
+  --ink:#14202B;--muted:#4F5B67;--line:#D9DFE5;--bg:#F2F4F6;--card:#FFFFFF;
+  --brand:#0B4F6C;--brand-d:#073A50;--amber:#E8A33D;--up:#146C43;--down:#A61B1B;
+  --warn-bg:#FFF3D6;--warn-bd:#E0C277;--warn-ink:#3F2A00;--side:#14202B;--side-2:#1D2D3C;
+  --focus:#1B5FAA;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.5;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3,p,ul,ol{margin:0}
+ul,ol{padding:0}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:3px}
+.side :focus-visible,.topbar :focus-visible{outline-color:#FFC247}
+[tabindex="-1"]:focus{outline:none}
+.skip{position:absolute;left:8px;top:-60px;background:#fff;color:var(--ink);padding:10px 14px;border-radius:6px;z-index:50;border:2px solid var(--ink)}
+.skip:focus{top:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.lk{background:none;border:0;padding:0;color:var(--brand);text-decoration:underline;text-underline-offset:2px;text-align:left}
+.lk:hover{color:var(--brand-d)}
+.btn{min-height:44px;padding:0 14px;border-radius:6px;border:1px solid var(--brand);background:#fff;color:var(--brand);font-weight:600}
+.btn:hover{background:#EAF2F6}
+.btn[aria-pressed="true"]{background:var(--brand);color:#fff}
+.shell{display:flex;min-height:100vh}
+.side{width:232px;flex:none;background:var(--side);color:#fff;display:flex;flex-direction:column;padding:16px 12px;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 4px}
+.mark{width:32px;height:32px;border-radius:7px;background:var(--amber);color:var(--ink);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.brand b{display:block;font-size:14px;line-height:1.2}
+.brand span{font-size:12px;color:#B9C4CE}
+.side ul{list-style:none;display:flex;flex-direction:column;gap:2px}
+.nav{width:100%;display:flex;align-items:center;justify-content:space-between;min-height:44px;padding:0 12px;border:0;border-left:4px solid transparent;border-radius:4px;background:transparent;color:#D5DDE4;font-size:14px;text-align:left}
+.nav:hover{background:var(--side-2)}
+.nav[aria-current="page"]{background:#27394A;border-left-color:var(--amber);color:#fff;font-weight:700}
+.subnav{margin:0 0 0 14px!important;padding-left:8px;border-left:1px solid #3B4D5D}
+.side-note{font-size:12px;color:#B9C4CE;line-height:1.4;padding:0 6px}
+.who{margin-top:auto;font-size:12px;color:#B9C4CE;padding:10px 6px 0;border-top:1px solid #2A3B4B}
+.who b{color:#fff;display:block;font-size:13px}
+.col{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{display:none;align-items:center;justify-content:space-between;padding:8px 8px 8px 16px;background:var(--side);color:#fff}
+.topbar .btn{background:transparent;color:#fff;border-color:#6B7B8A}
+main{padding:24px 28px 32px;display:flex;flex-direction:column;gap:16px;max-width:1280px;width:100%}
+h1{font-size:28px;line-height:1.2;font-weight:700}
+.sub{color:var(--muted);margin-top:4px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.pill{padding:4px 10px;border-radius:999px;background:#fff;border:1px solid #C5CED6;font-size:12px;font-weight:600}
+.pill.demo{background:var(--ink);border-color:var(--ink);color:#fff}
+.pill.warn{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-ink)}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-start}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap}
+.ctrls .btn{font-weight:500}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.card.key{border:2px solid var(--ink)}
+.card h2{font-size:17px}
+.card h3{font-size:14px}
+.k-l{font-size:12px;font-weight:600;color:var(--muted)}
+.k-v{font-size:28px;font-weight:700;line-height:1.15;margin-top:2px}
+.k-s{font-size:13px;margin-top:2px}
+.k-n{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+.up{color:var(--up);font-weight:600}
+.down{color:var(--down);font-weight:600}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:start}
+.row2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.sec{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.ai{border:1px solid #8A98A5}
+.ai-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:#E8EDF1;border:1px solid #8A98A5;font-size:12px;font-weight:600}
+.pts{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.pts li{display:flex;gap:10px;align-items:flex-start}
+.pts svg{flex:none;margin-top:4px}
+.detail{margin-top:12px;border-top:1px solid #E6EAEE;padding-top:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.detail h3{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.detail ul{padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.hyp{background:#F2F4F6;border:2px dashed #8A98A5;border-radius:8px;padding:10px 12px}
+.cust{list-style:none}
+.cust li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:12px 0;border-top:1px solid #E6EAEE;align-items:start}
+.cust .nm{font-weight:600;font-size:15px}
+.cust .amt{text-align:right}
+.cust .amt b{display:block;font-size:16px}
+.ctr{display:flex;align-items:center;gap:6px}
+table{border-collapse:collapse;width:100%}
+.team th{font-size:12px;font-weight:600;color:var(--muted);text-align:right;padding:6px 6px;border-bottom:1px solid #C5CED6;vertical-align:bottom}
+.team th:first-child,.team td:first-child{text-align:left}
+.team td{padding:4px 6px;border-bottom:1px solid #E6EAEE;text-align:right;font-size:13px}
+.team tfoot td{font-weight:700;border-bottom:0;border-top:2px solid var(--ink)}
+.th-b{background:none;border:0;padding:6px 0;font-weight:600;font-size:12px;color:var(--muted);min-height:32px}
+.th-b[data-on="1"]{color:var(--ink);text-decoration:underline}
+.od{min-height:44px;min-width:92px;padding:0 10px;border-radius:6px;border:1px solid var(--brand);background:#fff;color:var(--brand);font-weight:600;font-size:13px}
+.od:hover{background:#EAF2F6}
+.sortbar{display:none;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chart{display:flex;align-items:flex-end;gap:4px;height:170px;border-bottom:1px solid #8A98A5;margin-top:12px}
+.mb{flex:1 1 0;min-width:0;height:100%;display:flex;align-items:flex-end;justify-content:center;gap:2px;padding:0 2px;border:2px solid transparent;border-bottom:0;border-radius:4px 4px 0 0;background:transparent}
+.mb:hover{background:#EEF3F6}
+.mb[aria-pressed="true"]{background:#E3EBF0;border-color:var(--ink)}
+.b1,.b2{width:42%;max-width:18px;min-height:3px}
+.b1{background:#DCE6EC;border:2px solid var(--brand);border-bottom:0;border-radius:2px 2px 0 0}
+.b1.na{background:repeating-linear-gradient(45deg,#fff,#fff 3px,#C5CED6 3px,#C5CED6 4px);border-style:dashed}
+.b2{background:var(--brand);border-radius:2px 2px 0 0}
+.mlab{display:flex;gap:4px;margin-top:4px}
+.mlab span{flex:1 1 0;min-width:0;text-align:center;font-size:12px;color:var(--muted)}
+.leg{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:#33414E;margin-top:8px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:6px}
+.msum{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);min-width:0}
+#values{overflow-x:auto}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:10px}
+.stat{background:#F7F9FA;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.stat b{display:block;font-size:20px;line-height:1.2;margin-top:2px}
+.vt{width:100%;margin-top:10px;font-size:13px}
+.vt th{font-size:12px;font-weight:600;color:var(--muted);text-align:right;padding:6px;border-bottom:1px solid #C5CED6}
+.vt td{padding:2px 6px;border-bottom:1px solid #E6EAEE;text-align:right}
+.vt th:first-child,.vt td:first-child{text-align:left}
+.vt tr[data-sel="1"] td{background:#EEF3F6}
+.vt tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0;padding:8px 6px}
+.vt .lk{min-height:32px;font-weight:600}
+.mix{list-style:none}
+.mix li{margin-top:10px;padding:6px 8px;border-left:4px solid transparent;border-radius:4px}
+.mix li[data-sel="1"]{border-left-color:var(--amber);background:#FFF8E8}
+.mx-h{display:flex;justify-content:space-between;gap:8px;font-size:13px;flex-wrap:wrap}
+.mx-r{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:13px}
+.mx-r .lb{width:48px;font-size:12px;color:var(--muted);flex:none}
+.mx-r .bar{flex:1;min-width:0}
+.mx-r .v{width:128px;text-align:right;flex:none}
+.bc{height:10px;background:var(--brand);border-radius:2px}
+.bo{height:10px;background:#DCE6EC;border:2px solid var(--brand);border-radius:2px}
+.note{background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--warn-ink);line-height:1.5;margin-top:12px}
+.demo-box{border:2px dashed #8A98A5;background:#fff;border-radius:8px;padding:10px 14px;font-size:13px;color:#33414E}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;font-size:13px;color:#33414E}
+.crumbs .lk{min-height:44px;padding:0 4px}
+.about{background:#fff;border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:10px;padding:14px 18px;max-width:760px}
+.about h2{font-size:15px}
+.about p{font-size:13px;margin-top:6px;color:#2A3742}
+.foot{font-size:12px;color:var(--muted)}
+details.ex{margin-top:10px;font-size:13px}
+details.ex summary{min-height:32px;display:flex;align-items:center;cursor:pointer;color:var(--brand);font-weight:600}
+details.ex p{margin-top:4px;color:#33414E}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.list{list-style:none}
+.list li{padding:12px 0;border-top:1px solid #E6EAEE}
+.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+@media (max-width:1180px){
+  .row2,.row2e{grid-template-columns:minmax(0,1fr)}
+  .detail{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:960px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:860px){
+  .shell{flex-direction:column}
+  .topbar{display:flex;position:sticky;top:0;z-index:20}
+  .side{display:none;width:100%;padding:8px 12px 14px}
+  .side.open{display:flex}
+  .side .brand,.side .who{display:none}
+  main{padding:16px 16px 28px}
+  h1{font-size:24px}
+}
+@media (max-width:720px){
+  .team thead{display:none}
+  .team,.team tbody,.team tr,.team td,.team tfoot{display:block;width:100%}
+  .team tr{padding:10px 0;border-top:1px solid #E6EAEE}
+  .team td{display:flex;justify-content:space-between;align-items:center;border:0;padding:3px 0;text-align:right}
+  .team td::before{content:attr(data-label);font-size:12px;color:var(--muted);font-weight:600;text-align:left}
+  .team td:first-child{font-size:15px}
+  .team td:first-child::before{content:none}
+  .team tfoot tr{border-top:2px solid var(--ink)}
+  .team tfoot td{border:0}
+  .sortbar{display:flex}
+  .mx-r .v{width:104px}
+  .vt{font-size:12px}
+  .vt th,.vt td{padding:6px 3px}
+  .vt .hide-s{display:none}
+  .k-v{font-size:24px}
+}
+@media (max-width:420px){
+  .kpis{grid-template-columns:minmax(0,1fr)}
+  .stats{grid-template-columns:minmax(0,1fr)}
+  .chart{gap:2px}
+  .mlab{gap:2px}
+  .mlab span{font-size:10px}
+}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<noscript><p style="padding:20px">This interactive demo needs JavaScript. All data in it is fictional.</p></noscript>
+<div id="app"></div>
+<div id="live" class="sr" role="status" aria-live="polite"></div>
+
+<script>
+/* ===========================================================
+   Branch Sales Command Center — interactive demo
+   Everything here is fictional and self-contained: no network
+   calls, no external assets, no real company or customer data.
+   =========================================================== */
+(function () {
+'use strict';
+
+/* ---------------- Fictional demo data ---------------- */
+var AS_OF = 'Nov 6, 2026';
+var PERIOD = 'Jan 1 – Nov 6, 2026';
+var PRIOR = 'Jan 1 – Nov 6, 2025';
+var BRANCH = 'Lakeshore Branch';
+var CO = { name: 'Larkspur Industrial Supply', salesM: 96.2, growth: 6.6 };
+
+var REPS = [
+  { id: 'brennan', name: 'Maya Brennan',   prev: 3400, cur: 4260, od: 0, opps: 0 },
+  { id: 'nair',    name: 'Priya Nair',     prev: 2530, cur: 3370, od: 3, opps: 2 },
+  { id: 'castillo',name: 'Owen Castillo',  prev: 4090, cur: 3980, od: 2, opps: 2 },
+  { id: 'voss',    name: 'Elena Voss',     prev: 3900, cur: 3610, od: 4, opps: 3 },
+  { id: 'okafor',  name: 'Daniel Okafor',  prev: 3980, cur: 3420, od: 5, opps: 4 }
+];
+var CUSTS = [
+  { id: 'harborview', name: 'Harborview Foods Co.',   rep: 'Daniel Okafor', prev: 1148, cur: 612, seg: 'Food & beverage',        last: 'Oct 14, 2026' },
+  { id: 'pinecrest',  name: 'Pinecrest Paper Mills',  rep: 'Elena Voss',    prev: 1290, cur: 878, seg: 'Paper & packaging',      last: 'Oct 29, 2026' },
+  { id: 'cobalt',     name: 'Cobalt Chemical Works',  rep: 'Elena Voss',    prev: 760,  cur: 410, seg: 'Manufacturing',          last: 'Oct 3, 2026' },
+  { id: 'redfern',    name: 'Redfern Metalworks',     rep: 'Owen Castillo', prev: 1020, cur: 735, seg: 'Machinery & workshops',  last: 'Oct 21, 2026' },
+  { id: 'summit',     name: 'Summit Packaging Inc.',  rep: 'Daniel Okafor', prev: 540,  cur: 322, seg: 'Paper & packaging',      last: 'Oct 9, 2026' }
+];
+var FUPS = [
+  { rep: 'Daniel Okafor', cust: 'Harborview Foods Co.',  opp: 'OPP-2042', title: 'Bearing replacement quote', type: 'Call',  due: 'Oct 12, 2026', days: 25 },
+  { rep: 'Daniel Okafor', cust: 'Harborview Foods Co.',  opp: 'OPP-2042', title: 'Bearing replacement quote', type: 'Visit', due: 'Oct 28, 2026', days: 9 },
+  { rep: 'Daniel Okafor', cust: 'Summit Packaging Inc.', opp: 'OPP-2051', title: 'Belt restock',              type: 'Call',  due: 'Oct 20, 2026', days: 17 },
+  { rep: 'Daniel Okafor', cust: 'Cedar Board Corp.',     opp: 'OPP-2063', title: 'Lubrication program',       type: 'Email', due: 'Nov 3, 2026',  days: 3 },
+  { rep: 'Daniel Okafor', cust: 'Tidewater Textiles',    opp: 'OPP-2038', title: 'Drive maintenance',         type: 'Call',  due: 'Oct 16, 2026', days: 21 },
+  { rep: 'Elena Voss',    cust: 'Pinecrest Paper Mills', opp: 'OPP-2047', title: 'Pneumatic line upgrade',    type: 'Visit', due: 'Oct 22, 2026', days: 15 },
+  { rep: 'Elena Voss',    cust: 'Pinecrest Paper Mills', opp: 'OPP-2047', title: 'Pneumatic line upgrade',    type: 'Call',  due: 'Oct 30, 2026', days: 7 },
+  { rep: 'Elena Voss',    cust: 'Cobalt Chemical Works', opp: 'OPP-2029', title: 'Pump and seal kit',         type: 'Call',  due: 'Oct 9, 2026',  days: 28 },
+  { rep: 'Elena Voss',    cust: 'Valley Dairy Co-op',    opp: 'OPP-2066', title: 'Abrasives restock',         type: 'Email', due: 'Nov 1, 2026',  days: 5 },
+  { rep: 'Owen Castillo', cust: 'Redfern Metalworks',    opp: 'OPP-2055', title: 'Tools and abrasives',       type: 'Visit', due: 'Oct 26, 2026', days: 11 },
+  { rep: 'Owen Castillo', cust: 'Ironbridge Foundry',    opp: 'OPP-2069', title: 'Spare bearings',            type: 'Call',  due: 'Nov 4, 2026',  days: 2 },
+  { rep: 'Priya Nair',    cust: 'Granite Plastics Inc.', opp: 'OPP-2044', title: 'Pneumatic cylinders',       type: 'Call',  due: 'Oct 19, 2026', days: 18 },
+  { rep: 'Priya Nair',    cust: 'Granite Plastics Inc.', opp: 'OPP-2044', title: 'Pneumatic cylinders',       type: 'Visit', due: 'Oct 31, 2026', days: 6 },
+  { rep: 'Priya Nair',    cust: 'Clearwater Packaging',  opp: 'OPP-2068', title: 'Safety supplies',           type: 'Email', due: 'Nov 2, 2026',  days: 4 }
+];
+/* Monthly net sales, $K. prev === null means the prior-year month is missing from the demo data. */
+var MONTHS = [
+  { l: 'Dec', full: 'December 2025',  cur: 2150, prev: null, note: 'gap' },
+  { l: 'Jan', full: 'January 2026',   cur: 1420, prev: 1500 },
+  { l: 'Feb', full: 'February 2026',  cur: 1610, prev: 1540 },
+  { l: 'Mar', full: 'March 2026',     cur: 1880, prev: 1720 },
+  { l: 'Apr', full: 'April 2026',     cur: 1790, prev: 1760 },
+  { l: 'May', full: 'May 2026',       cur: 1950, prev: 1820 },
+  { l: 'Jun', full: 'June 2026',      cur: 1870, prev: 1780 },
+  { l: 'Jul', full: 'July 2026',      cur: 1990, prev: 1860 },
+  { l: 'Aug', full: 'August 2026',    cur: 1860, prev: 1790 },
+  { l: 'Sep', full: 'September 2026', cur: 1930, prev: 1870 },
+  { l: 'Oct', full: 'October 2026',   cur: 2080, prev: 2000 },
+  { l: 'Nov', full: 'November 2026',  cur: 260,  prev: 260, note: 'partial' }
+];
+var YTD_CUR = 18640, YTD_PREV = 17900;
+var BRANDS = [
+  ['Aldren', 3960, 3700, 18.9], ['Corvane', 2890, 2950, 12.4], ['Hexton', 2010, 1860, 11.6],
+  ['Mirov', 1470, 1150, 5.3], ['Tessera', 1190, 1240, 7.9], ['Other brands', 7120, 7000, 43.9]
+];
+var BRAND_KIDS = [
+  ['Norvik', 1640, 1600, 9.8], ['Pelham', 1480, 1430, 8.7], ['Quillon', 1260, 1300, 7.4],
+  ['Rayburn', 1120, 1090, 6.5], ['Minor brands', 1620, 1580, 11.5]
+];
+var FAM = [['Power transmission', 28.4, 24.6], ['Bearings', 22.1, 19.8], ['Pneumatics & hydraulics', 16.7, 14.2],
+  ['Tools & abrasives', 12.9, 17.5], ['Safety supplies', 9.8, 15.3], ['Other', 10.1, 8.6]];
+var FAM_KIDS = [['Lubrication & maintenance', 5.4, 4.6], ['Instrumentation & other', 4.7, 4.0]];
+var SEG = [['Food & beverage', 26.9, 24.3], ['Machinery & workshops', 21.2, 14.8], ['Manufacturing', 16.5, 24.6],
+  ['Paper & packaging', 12.1, 9.8], ['Automotive', 8.6, 11.2], ['Other', 11.5, 12.6]];
+var SEG_KIDS = [['Energy & mining', 4.8, 5.1], ['Construction', 3.9, 4.2], ['Textile & apparel', 2.8, 3.3]];
+var SEG_MISS = [3.2, 2.7]; /* branch %, company % — sales whose segment mapping is unavailable */
+
+/* ---------------- helpers ---------------- */
+var MINUS = '−';
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function num(v) { return String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function pc(v) { return v.toFixed(1); }
+function K(v) { return '$' + num(Math.abs(v)) + 'K'; }
+function sK(v) { return (v < 0 ? MINUS : '+') + K(v); }
+function sP(v) { return (v < 0 ? MINUS : '+') + pc(Math.abs(v)) + '%'; }
+function pp(v) { var r = Math.round(v * 10) / 10; return (r < 0 ? MINUS : r > 0 ? '+' : '') + pc(Math.abs(r)) + ' pp'; }
+function arrow(v) { return v < 0 ? '▼' : v > 0 ? '▲' : ''; }
+function cls(v) { return v < 0 ? 'down' : v > 0 ? 'up' : ''; }
+function r1(v) { return Math.round(v * 10) / 10; }
+function byName(arr, n) { for (var i = 0; i < arr.length; i++) if (arr[i].name === n) return arr[i]; return null; }
+function byId(arr, id) { for (var i = 0; i < arr.length; i++) if (arr[i].id === id) return arr[i]; return null; }
+
+/* ---------------- state ---------------- */
+var S = { view: 'home', stack: [], sortKey: 'delta', sortDir: 'asc', aiOpen: false, menuOpen: false, toolsOpen: false,
+  month: 10, table: false, fuRep: 'all', custId: null, repId: null, bd: null, bdSel: null, simTitle: '', simBody: '', simKind: '', navKey: null, focusTitle: false };
+var RESET = { custId: null, repId: null, fuRep: 'all', bd: null, bdSel: null, simTitle: '', simBody: '', simKind: '', navKey: null };
+var BD_TITLES = { brand: 'Sales by brand', family: 'Product-family mix', segment: 'Customer-segment mix' };
+var SIM_BODY = 'This destination is simulated. In a real product it would open the existing screen; this demo only carries over the branch, the reporting period and the data cutoff.';
+
+function labelOf(s) {
+  if (s.view === 'customer') return (byId(CUSTS, s.custId) || {}).name || 'Customer';
+  if (s.view === 'advisor') return (byId(REPS, s.repId) || {}).name || 'Advisor';
+  if (s.view === 'followups') return 'Overdue follow-ups';
+  if (s.view === 'breakdown') return BD_TITLES[s.bd] || 'Breakdown';
+  if (s.view === 'sim') return s.simTitle || 'Simulated destination';
+  return 'Home';
+}
+function go(next) {
+  var entry = { view: S.view, custId: S.custId, repId: S.repId, fuRep: S.fuRep, bd: S.bd, bdSel: S.bdSel, simTitle: S.simTitle, simBody: S.simBody, simKind: S.simKind, navKey: S.navKey, y: window.scrollY, label: labelOf(S) };
+  var st = S.stack.concat([entry]);
+  assign(S, RESET); assign(S, next); S.stack = st; S.menuOpen = false; S.focusTitle = true; S.scrollTop = true; render();
+}
+function popTo(i) {
+  var e = S.stack[i]; if (!e) return;
+  var st = S.stack.slice(0, i);
+  assign(S, RESET); assign(S, e); S.stack = st; S.menuOpen = false; S.focusTitle = true; S.scrollTo = e.y || 0; render();
+}
+function assign(a, b) { for (var k in b) if (Object.prototype.hasOwnProperty.call(b, k)) a[k] = b[k]; return a; }
+function navTo(label, tool) {
+  assign(S, RESET);
+  assign(S, { view: 'sim', simTitle: label, simBody: SIM_BODY, simKind: 'nav', navKey: label });
+  S.stack = [{ view: 'home', label: 'Home', y: 0 }]; S.menuOpen = false; if (tool) S.toolsOpen = true; S.focusTitle = true; S.scrollTop = true; render();
+}
+function navHome() { assign(S, RESET); S.view = 'home'; S.stack = []; S.menuOpen = false; S.focusTitle = true; S.scrollTop = true; render(); }
+
+/* ---------------- derived data ---------------- */
+function sortedReps() {
+  var f = { sales: function (r) { return r.cur; }, delta: function (r) { return r.cur - r.prev; }, pct: function (r) { return (r.cur - r.prev) / r.prev; }, overdue: function (r) { return r.od; } };
+  var d = S.sortDir === 'asc' ? 1 : -1;
+  return REPS.slice().sort(function (a, b) {
+    var x = f[S.sortKey](a) - f[S.sortKey](b);
+    if (x === 0) x = f.delta(a) - f.delta(b);
+    return x * d;
+  });
+}
+function monthText(i) {
+  var m = MONTHS[i];
+  if (m.prev === null) return m.full + ': ' + K(m.cur) + '; prior-year month not available';
+  var d = m.cur - m.prev;
+  return m.full + ': ' + K(m.cur) + ' vs ' + K(m.prev) + ' a year earlier (' + (d === 0 ? 'no change' : sK(d) + ', ' + sP(d / m.prev * 100)) + ')';
+}
+
+/* ---------------- view pieces ---------------- */
+var ICON_CHECK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#146C43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+var ICON_ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B4F6C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg>';
+var ICON_Q = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#14202B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .8-1 1.7"/><path d="M12 17v.01"/></svg>';
+var ICON_WARN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C3D00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M12 3l10 18H2z"/><path d="M12 10v5"/><path d="M12 18v.01"/></svg>';
+var ICON_SPARK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="#14202B" aria-hidden="true"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg>';
+
+function A(act, arg, text, extra, fk) {
+  return '<button type="button" class="lk" data-act="' + act + '"' + (arg != null ? ' data-arg="' + esc(arg) + '"' : '') + (fk ? ' data-fk="' + esc(fk) + '"' : '') + (extra || '') + '>' + text + '</button>';
+}
+
+function sidebar() {
+  function item(label, act, tool) {
+    var cur = (S.view === 'sim' && S.navKey ? S.navKey : 'Home') === label;
+    return '<li><button type="button" class="nav" data-act="' + act + '" data-arg="' + esc(label) + '" data-fk="nav-' + esc(label) + '"' + (cur ? ' aria-current="page"' : '') + '>' + esc(label) + '</button></li>';
+  }
+  var tools = ['Quote builder', 'RFQ inbox', 'Inventory planning', 'Purchase history'];
+  return '<aside class="side' + (S.menuOpen ? ' open' : '') + '" id="side">' +
+    '<div class="brand"><span class="mark" aria-hidden="true">LS</span><div><b>Larkspur Supply</b><span>Sales Command Center</span></div></div>' +
+    '<nav aria-label="Main navigation"><ul>' + item('Home', 'nav-home') + item('Opportunities', 'nav') + item('Activities', 'nav') + item('Accounts', 'nav') + item('Team', 'nav') +
+    '<li><button type="button" class="nav" aria-expanded="' + S.toolsOpen + '" aria-controls="tools" data-act="tools" data-fk="tools">Tools <span aria-hidden="true" style="font-size:12px">' + (S.toolsOpen ? '▾' : '▸') + '</span></button>' +
+    (S.toolsOpen ? '<ul class="subnav" id="tools">' + tools.map(function (t) { return item(t, 'nav-tool'); }).join('') + '</ul>' : '') + '</li></ul></nav>' +
+    '<p class="side-note">Menu destinations are simulated.</p>' +
+    '<div class="who"><b>Jordan Ellis</b>Sales manager · Lakeshore Branch<br>Fictional user</div></aside>';
+}
+
+function ctxBar() {
+  return '<div class="pills" role="group" aria-label="Context carried over">' +
+    '<span class="pill">Branch: ' + BRANCH + '</span><span class="pill">Year to date: ' + PERIOD + ' vs ' + PRIOR + '</span>' +
+    '<span class="pill">Data as of ' + AS_OF + '</span><span class="pill demo">Interactive demo · Fictional data</span></div>';
+}
+
+function kpis() {
+  var d = YTD_CUR - YTD_PREV, g = d / YTD_PREV * 100;
+  var gap = r1(g) - CO.growth;
+  return '<section class="kpis" aria-label="Branch performance, year to date">' +
+    '<div class="card"><div class="k-l">Net sales YTD · Lakeshore</div><div class="k-v">$18.64M</div>' +
+    '<div class="k-s ' + cls(d) + '"><span aria-hidden="true">' + arrow(d) + '</span> ' + sP(g) + ' (+$0.74M vs $17.90M)</div>' +
+    '<div class="k-n">Lakeshore = 19.4% of company ($96.2M).</div><a href="#trend" style="font-size:13px">See monthly trend</a></div>' +
+    '<div class="card"><div class="k-l">Change vs prior year</div>' +
+    '<div class="mx-r" style="margin-top:8px"><span class="lb" style="width:64px">Branch</span><div class="bar"><div class="bc" style="width:' + (g * 6) + '%"></div></div><b class="up" style="width:58px;text-align:right">' + sP(g) + '</b></div>' +
+    '<div class="mx-r"><span class="lb" style="width:64px">Company</span><div class="bar"><div class="bo" style="width:' + (CO.growth * 6) + '%"></div></div><b class="up" style="width:58px;text-align:right">' + sP(CO.growth) + '</b></div>' +
+    '<div class="k-n">Branch grew ' + pc(Math.abs(gap)) + ' pp slower than the company over the same dates. Company includes Lakeshore.</div></div>' +
+    '<div class="card"><div class="k-l">Customers with purchases · Lakeshore</div><div class="k-v">214</div>' +
+    '<div class="k-s down"><span aria-hidden="true">▼</span> ' + MINUS + '17 vs 231 in 2025 (' + MINUS + '7.4%)</div><div class="k-n">Same elapsed dates.</div>' +
+    A('sim', 'Customers with purchases (214)', 'View customers', ' style="font-size:13px;min-height:32px"', 'k-cust') + '</div>' +
+    '<div class="card"><div class="k-l">Opportunities requiring attention</div><div class="k-v">23 <span class="muted" style="font-size:14px;font-weight:400">of 61 open</span></div>' +
+    '<div class="k-n">11 have overdue follow-ups (14 follow-ups in total). 12 have only gone quiet: no activity in 21+ days.</div>' +
+    '<a href="#advisors" style="font-size:13px">See follow-ups by advisor</a></div></section>';
+}
+
+function aiCard() {
+  var li = function (ic, html) { return '<li>' + ic + '<div>' + html + '</div></li>'; };
+  var detail = !S.aiOpen ? '' :
+    '<div class="detail" id="analysis">' +
+    '<div><h3>' + ICON_CHECK + 'More supported observations</h3><ul><li>Aldren is the largest brand at $3,960K (21.2% of Lakeshore). Mirov grew +27.8% (+$320K); Corvane fell ' + MINUS + '2.0% (' + MINUS + '$60K). <a href="#brands">See brands</a></li></ul></div>' +
+    '<div class="hyp"><h3>' + ICON_Q + 'Hypotheses to validate (unconfirmed)</h3><ul>' +
+    '<li>Some declines may come from accounts that changed advisor; the demo data cannot confirm this. <a href="#advisors">See advisors</a></li>' +
+    '<li>Having 17 fewer customers buying (214 vs 231) could explain part of the gap with the company; their activity has not been reviewed. <a href="#customers">See customers</a></li></ul>' +
+    '<p class="small" style="margin-top:8px;color:#33414E">A drop in purchases alone does not establish a cause.</p></div>' +
+    '<div><h3>' + ICON_ARROW + 'Other suggestions to investigate</h3><ul>' +
+    '<li>Review the 14 overdue follow-ups (11 opportunities); 5 belong to Daniel Okafor. <a href="#advisors">See advisors</a></li>' +
+    '<li>Look at why Corvane (' + MINUS + '$60K) and Tessera (' + MINUS + '$50K) fell while Aldren, Hexton and Mirov grew. <a href="#brands">See brands</a></li></ul></div></div>';
+  return '<section class="card ai" aria-labelledby="ai-h"><div class="ai-top"><h2 id="ai-h">Branch summary</h2>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span class="tag">' + ICON_SPARK + 'Simulated AI summary</span><span class="small muted" style="font-weight:600">Data as of ' + AS_OF + '</span></div></div>' +
+    '<ul class="pts" aria-label="Key points">' +
+    li(ICON_CHECK, '<strong>Performance vs company.</strong> Lakeshore net sales YTD are $18.64M: +4.1% vs 2025, against +6.6% for the company (' + MINUS + '2.5 pp). <a href="#trend">See trend</a>') +
+    li(ICON_CHECK, '<strong>Main customer driver.</strong> Five accounts are down a combined $1.80M; the largest are Harborview Foods Co. (' + MINUS + '$536K) and Pinecrest Paper Mills (' + MINUS + '$412K). <a href="#customers">See customers</a>') +
+    li(ICON_ARROW, '<strong>Priority to investigate</strong> <span class="small muted">(suggestion)</span>. Review the Daniel Okafor and Elena Voss portfolios: 4 of the 5 largest declining accounts are theirs. <a href="#advisors">See advisors</a>') +
+    '</ul><button type="button" class="btn" style="margin-top:12px" aria-expanded="' + S.aiOpen + '" aria-controls="analysis" data-act="ai" data-fk="ai">' + (S.aiOpen ? 'Hide full analysis' : 'View full analysis') + ' <span aria-hidden="true">' + (S.aiOpen ? '▴' : '▾') + '</span></button>' +
+    detail + '<p class="small muted" style="margin-top:10px">Simulated summary written from this demo’s fictional metrics; no AI model is involved. It can be wrong, so verify in the linked sections.</p></section>';
+}
+
+function customersCard() {
+  var items = CUSTS.map(function (c, i) {
+    var d = c.cur - c.prev, p = d / c.prev * 100;
+    return '<li><div><span class="muted small">' + (i + 1) + '.</span> ' + A('customer', c.id, esc(c.name), ' style="font-weight:600;font-size:15px"', 'c-' + c.id) +
+      '<div class="small muted">Advisor: ' + A('advisor-name', c.rep, esc(c.rep), '', 'cr-' + c.id) + ' · Sales down</div>' +
+      '<div class="small muted">2025: ' + K(c.prev) + ' → 2026: ' + K(c.cur) + '</div></div>' +
+      '<div class="amt down"><b>' + sK(d) + '</b>' + sP(p) + '<div style="margin-top:6px"><button type="button" class="btn" style="font-weight:600" data-act="customer" data-arg="' + c.id + '" aria-label="View customer ' + esc(c.name) + '" data-fk="cv-' + c.id + '">View</button></div></div></li>';
+  }).join('');
+  return '<section class="card key" id="customers" aria-labelledby="cust-h"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 id="cust-h">Declining customer accounts</h2><span class="small muted">Showing 5 of 18</span></div>' +
+    '<p class="small muted" style="margin-top:2px">Ranked by absolute sales decline ($) vs the same dates in 2025, with the percentage alongside. These are declining sales, not confirmed lost business.</p>' +
+    '<ul class="cust">' + items + '</ul>' + A('sim', 'Declining customers (18)', 'View all 18 accounts', ' style="min-height:44px;font-weight:600"', 'c-all') + '</section>';
+}
+
+function teamCard() {
+  var rows = sortedReps();
+  function th(label, key) {
+    var on = S.sortKey === key;
+    var ar = on ? (S.sortDir === 'asc' ? ' ↑' : ' ↓') : '';
+    return '<th scope="col" aria-sort="' + (on ? (S.sortDir === 'asc' ? 'ascending' : 'descending') : 'none') + '"><button type="button" class="th-b" data-on="' + (on ? 1 : 0) + '" data-act="sort" data-arg="' + key + '" data-fk="th-' + key + '">' + label + ar + '</button></th>';
+  }
+  var body = rows.map(function (r) {
+    var d = r.cur - r.prev, p = d / r.prev * 100;
+    return '<tr><td data-label="Advisor">' + A('advisor', r.id, esc(r.name), ' style="font-weight:600;font-size:15px;min-height:44px"', 'a-' + r.id) + '</td>' +
+      '<td data-label="Net sales YTD">$' + num(r.cur) + 'K</td>' +
+      '<td data-label="Change in $" class="' + cls(d) + '"><span aria-hidden="true">' + arrow(d) + '</span> ' + sK(d) + '</td>' +
+      '<td data-label="Change in %" class="' + cls(d) + '">' + sP(p) + '</td>' +
+      '<td data-label="Overdue follow-ups">' + (r.od > 0
+        ? '<button type="button" class="od" data-act="followups" data-arg="' + r.id + '" aria-label="View ' + r.od + ' overdue follow-ups for ' + esc(r.name) + '" data-fk="od-' + r.id + '">' + r.od + ' overdue →</button><div class="small muted" style="margin-top:2px">in ' + r.opps + ' opp' + (r.opps === 1 ? '' : 's') + '</div>'
+        : '<span class="muted">✓ 0 · on track</span>') + '</td></tr>';
+  }).join('');
+  var chips = [['delta', 'Change in $'], ['pct', 'Change in %'], ['sales', 'Net sales'], ['overdue', 'Overdue']].map(function (c) {
+    return '<button type="button" class="btn" style="min-height:44px;font-size:13px" aria-pressed="' + (S.sortKey === c[0]) + '" data-act="sort" data-arg="' + c[0] + '" data-fk="chip-' + c[0] + '">' + c[1] + (S.sortKey === c[0] ? (S.sortDir === 'asc' ? ' ↑' : ' ↓') : '') + '</button>';
+  }).join('');
+  return '<section class="card key" id="advisors" aria-labelledby="team-h"><h2 id="team-h">Advisors</h2>' +
+    '<p class="small muted" style="margin-top:2px">All 5 Lakeshore advisors. Sales changes and overdue follow-ups are separate signals, not a combined score. Default order: largest decline first (a proposal).</p>' +
+    '<div class="sortbar" role="group" aria-label="Sort advisors by">' + chips + '</div>' +
+    '<table class="team"><caption class="sr">Lakeshore advisors, sortable</caption><thead><tr><th scope="col">Advisor</th>' + th('Net sales YTD', 'sales').replace('<th scope="col"', '<th scope="col"') + th('Change in $', 'delta') + th('Change in %', 'pct') + th('Overdue follow-ups', 'overdue') + '</tr></thead>' +
+    '<tbody>' + body + '</tbody><tfoot><tr><td data-label="Total">Total Lakeshore</td><td data-label="Net sales YTD">$18,640K</td><td data-label="Change in $" class="up"><span aria-hidden="true">▲</span> +$740K</td><td data-label="Change in %" class="up">+4.1%</td><td data-label="Overdue follow-ups">14 in 11 opps</td></tr></tfoot></table>' +
+    '<details class="ex"><summary>How account reassignment affects these comparisons</summary><p>Each change compares the sales credited to an advisor in each period, without adjusting for reassignments. If an account moved from one advisor to another during the year, its earlier sales can stay with the previous advisor, so one portfolio’s change can look better and another’s worse. Branch totals are not affected.</p></details></section>';
+}
+
+function trendCard() {
+  var max = 2150;
+  var cols = MONTHS.map(function (m, i) {
+    return '<button type="button" class="mb" data-act="month" data-arg="' + i + '" data-fk="m-' + i + '" aria-pressed="' + (S.month === i) + '" aria-label="' + esc(monthText(i)) + '">' +
+      (m.prev === null ? '<div class="b1 na" style="height:6%"></div>' : '<div class="b1" style="height:' + (m.prev / max * 100) + '%"></div>') +
+      '<div class="b2" style="height:' + (m.cur / max * 100) + '%"></div></button>';
+  }).join('');
+  var labs = MONTHS.map(function (m) { return '<span>' + m.l + (m.note === 'partial' ? '*' : m.note === 'gap' ? '†' : '') + '</span>'; }).join('');
+  return '<section class="card" id="trend" aria-labelledby="tr-h"><h2 id="tr-h">Monthly sales trend</h2>' +
+    '<p class="small muted" style="margin-top:2px">Last 12 months (Dec 2025 – Nov 2026) vs the same months a year earlier. Select a month, with the mouse or the keyboard, to update the summary below.</p>' +
+    '<div class="leg"><span><span class="sw" style="background:var(--brand)"></span>Last 12 months</span><span><span class="sw" style="background:#DCE6EC;border:2px solid var(--brand)"></span>Same month, a year earlier</span></div>' +
+    '<div class="chart" role="group" aria-label="Monthly net sales, one button per month">' + cols + '</div><div class="mlab" aria-hidden="true">' + labs + '</div>' +
+    '<p class="small muted" style="margin-top:8px">Scale: $0 – $2,150K per month. * November is partial (Nov 1–6) and compared with Nov 1–6, 2025. † No December 2024 data in this demo, so December 2025 has no comparison.</p>' + monthSummary() + '</section>';
+}
+
+function barRow(name, o) {
+  /* o: {amount, yoy, yoyCls, branch, co, diff, child, sel, act, kind} */
+  var nm = o.act ? A('breakdown', o.kind + '|' + name, esc(name), ' style="font-weight:' + (o.child ? 500 : 600) + ';font-size:13px;min-height:32px"', 'bd-' + o.kind + '-' + name) : '<span style="font-weight:' + (o.child ? 500 : 600) + '">' + esc(name) + (o.sel ? '<span class="sr"> (selected)</span>' : '') + '</span>';
+  return '<li' + (o.sel ? ' data-sel="1"' : '') + ' style="margin-left:' + (o.child ? 18 : 0) + 'px"><div class="mx-h">' + nm +
+    (o.yoy ? '<span class="' + o.yoyCls + '"><span aria-hidden="true">' + o.arrow + '</span> ' + o.yoy + ' vs 2025</span>' : '') + '</div>' +
+    '<div class="mx-r"><span class="lb">Branch</span><div class="bar"><div class="bc" style="width:' + r1(o.branch * 1.8) + '%"></div></div><span class="v"><b>' + (o.amount ? o.amount + ' · ' : '') + pc(o.branch) + '%</b></span></div>' +
+    '<div class="mx-r"><span class="lb">Co.</span><div class="bar"><div class="bo" style="width:' + r1(o.co * 1.8) + '%"></div></div><span class="v muted">' + pc(o.co) + '% · ' + pp(o.branch - o.co) + '</span></div></li>';
+}
+function brandOpts(b, act, kind, sel, child) {
+  var share = r1(b[1] / YTD_CUR * 100), y = (b[1] - b[2]) / b[2] * 100;
+  return { amount: K(b[1]), yoy: sP(y), yoyCls: cls(y), arrow: arrow(y), branch: share, co: b[3], child: child, sel: sel === b[0], act: act, kind: kind };
+}
+function legend() {
+  return '<div class="leg"><span><span class="sw" style="background:var(--brand)"></span>Branch</span><span><span class="sw" style="background:#DCE6EC;border:2px solid var(--brand)"></span>Company (includes Lakeshore)</span></div>';
+}
+function brandCard() {
+  return '<section class="card" id="brands" aria-labelledby="br-h"><h2 id="br-h">Sales by brand</h2>' +
+    '<p class="small muted" style="margin-top:2px">Lakeshore net sales YTD, change vs 2025 and share of Lakeshore vs share of the company. pp = percentage points (branch share minus company share). Fictional brands.</p>' + legend() +
+    '<ul class="mix">' + BRANDS.map(function (b) { return barRow(b[0], brandOpts(b, true, 'brand', null, false)); }).join('') + '</ul>' +
+    A('breakdown', 'brand|', 'View full brand breakdown', ' style="min-height:44px;font-weight:600;margin-top:8px"', 'bd-brand-all') + '</section>';
+}
+function mixCard(id, title, desc, rows, kind, link) {
+  return '<section class="card" id="' + id + '" aria-labelledby="' + id + '-h"><h2 id="' + id + '-h">' + title + '</h2><p class="small muted" style="margin-top:2px">' + desc + '</p>' + legend() +
+    '<ul class="mix">' + rows.map(function (r) { return barRow(r[0], { branch: r[1], co: r[2], act: true, kind: kind }); }).join('') + '</ul>' +
+    (kind === 'segment' ? segNote() : '') + A('breakdown', kind + '|', link, ' style="min-height:44px;font-weight:600;margin-top:8px"', 'bd-' + kind + '-all') + '</section>';
+}
+function segNote() {
+  return '<div class="note">' + ICON_WARN + '<div><strong>Segment unavailable due to a mapping issue.</strong> This affects 3.2% of Lakeshore sales ($596K) and 2.7% of company sales. These are not customers without a segment, and they are not included in Other.</div></div>';
+}
+
+function monthSummary() {
+  var m = MONTHS[S.month], i = S.month;
+  var inYtd = i >= 1;
+  var complete = MONTHS.slice(1, 11).map(function (x, j) { return { j: j + 1, v: x.cur }; }).sort(function (a, b) { return b.v - a.v; });
+  var rank = 0; complete.forEach(function (x, k) { if (x.j === i) rank = k + 1; });
+  var chg, chgCls = '', chgSub = '';
+  if (m.prev === null) { chg = 'Not available'; chgSub = 'No December 2024 data in this demo, so no % change is shown.'; }
+  else { var d = m.cur - m.prev; chg = d === 0 ? 'No change' : sK(d); chgCls = cls(d); chgSub = d === 0 ? 'Same as the same dates in 2025' : sP(d / m.prev * 100) + ' vs a year earlier'; }
+  var share = inYtd ? pc(m.cur / YTD_CUR * 100) + '% of YTD sales' : 'Before the 2026 YTD period';
+  var rk = i >= 1 && i <= 10 ? 'Ranks ' + rank + ' of 10 complete months in 2026 by net sales.' : (i === 11 ? 'Partial month (Nov 1–6): not ranked.' : 'December 2025 falls before the 2026 YTD period.');
+  var badge = m.note === 'partial' ? '<span class="pill warn">Partial month · Nov 1–6</span>' : m.note === 'gap' ? '<span class="pill warn">Prior-year month not available</span>' : '';
+  var tableBtn = '<button type="button" class="btn" aria-expanded="' + S.table + '" aria-controls="values" data-act="table" data-fk="tbl">' + (S.table ? 'Hide values table' : 'View values table') + '</button>';
+  var tbl = '';
+  if (S.table) {
+    var rows = MONTHS.map(function (x, k) {
+      var dd = x.prev === null ? null : x.cur - x.prev;
+      return '<tr data-sel="' + (k === S.month ? 1 : 0) + '"><td>' + A('month', k, esc(x.full) + (x.note === 'partial' ? ' (partial)' : ''), (k === S.month ? ' aria-current="true"' : ''), 'vm-' + k) + '</td><td>' + K(x.cur) + '</td>' +
+        '<td>' + (x.prev === null ? '<span class="muted">Not available</span>' : K(x.prev)) + '</td>' +
+        '<td class="hide-s ' + (dd === null ? '' : cls(dd)) + '">' + (dd === null ? '—' : (dd === 0 ? 'No change' : sK(dd))) + '</td>' +
+        '<td class="' + (dd === null ? '' : cls(dd)) + '">' + (dd === null ? '—' : (dd === 0 ? '0.0%' : sP(dd / x.prev * 100))) + '</td></tr>';
+    }).join('');
+    tbl = '<div id="values"><table class="vt"><caption class="sr">Monthly net sales, Lakeshore Branch, in thousands of dollars</caption><thead><tr><th scope="col">Month (select)</th><th scope="col">Net sales</th><th scope="col">Same month, a year earlier</th><th scope="col" class="hide-s">Change in $</th><th scope="col">Change in %</th></tr></thead><tbody>' + rows + '</tbody>' +
+      '<tfoot><tr><td>YTD (Jan 1 – Nov 6)</td><td>$18,640K</td><td>$17,900K</td><td class="hide-s up">+$740K</td><td class="up">+4.1%</td></tr></tfoot></table>' +
+      '<p class="small muted" style="margin-top:6px">Amounts in thousands of dollars. YTD covers Jan 1 – Nov 6 and excludes December 2025.</p></div>';
+  }
+  return '<section class="msum" aria-labelledby="ms-h"><div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center"><h2 id="ms-h">' + esc(m.full) + ' summary</h2>' + badge + '</div>' +
+    '<div aria-live="polite"><div class="stats">' +
+    '<div class="stat"><span class="k-l">Net sales</span><b>' + K(m.cur) + '</b><span class="small muted">' + share + '</span></div>' +
+    '<div class="stat"><span class="k-l">Same month, a year earlier</span><b>' + (m.prev === null ? 'Not available' : K(m.prev)) + '</b><span class="small muted">' + (m.note === 'partial' ? 'Nov 1–6, 2025' : m.prev === null ? 'Missing period' : 'Same calendar month') + '</span></div>' +
+    '<div class="stat"><span class="k-l">Change</span><b class="' + chgCls + '">' + chg + '</b><span class="small muted">' + chgSub + '</span></div>' +
+    '<div class="stat"><span class="k-l">Position</span><b style="font-size:16px">' + (i >= 1 && i <= 10 ? '#' + rank + ' of 10' : '—') + '</b><span class="small muted">' + rk + '</span></div></div></div>' +
+    '<div style="margin-top:10px">' + tableBtn + '</div>' + tbl + '</section>';
+}
+
+function aboutPanel() {
+  return '<aside class="about" id="about" aria-labelledby="ab-h"><h2 id="ab-h">About this demo</h2>' +
+    '<p>I defined what a sales manager needed to decide, directed the design, and iterated on the prototype in Claude Design. I used Codex to implement and verify the internal version. One change I directed was moving monthly figures into a full-width summary with an expandable table so the amounts were easy to read.</p></aside>';
+}
+
+function home() {
+  return '<div class="head"><div><h1 id="view-title" tabindex="-1">Where should I intervene today?</h1>' +
+    '<p class="sub">' + BRANCH + ' · Year to date: ' + PERIOD + ', vs the same elapsed dates in 2025 (' + PRIOR + ') · USD</p>' + ctxBar() + '</div>' +
+    '<div class="ctrls"><button type="button" class="btn" data-act="sim" data-arg="Branch and period" data-fk="sel-b">Branch: <b>Lakeshore</b> ▾</button><button type="button" class="btn" data-act="sim" data-arg="Branch and period" data-fk="sel-p">Period: <b>Year to date</b> ▾</button></div></div>' +
+    kpis() + aiCard() +
+    '<div class="sec">Decide where to act</div><div class="row2">' + customersCard() + teamCard() + '</div>' +
+    '<div class="sec">Investigate the change</div><div class="row2e">' + trendCard() + brandCard() + '</div>' +
+    '<div class="row2e">' + mixCard('family', 'Product-family mix', 'Share of net sales YTD, Lakeshore vs company. Diff = branch share minus company share, in percentage points.', FAM, 'family', 'View full family breakdown') +
+    mixCard('segment', 'Customer-segment mix', 'Share of net sales YTD, top five segments plus Other. Shares of total net sales; segments plus the mapping issue add up to 100%.', SEG, 'segment', 'View full segment breakdown') + '</div>' +
+    aboutPanel() + '<p class="foot">Interactive demo · Fictional data · Data as of ' + AS_OF + '. Company, branch, customers, advisors, brands and figures are invented for this demo.</p>';
+}
+
+function crumbsHtml() {
+  var out = S.stack.map(function (e, i) { return '<span style="display:inline-flex;align-items:center;gap:4px"><button type="button" class="lk" data-act="crumb" data-arg="' + i + '" data-fk="cr' + i + '">' + esc(e.label || 'Home') + '</button><span aria-hidden="true">›</span></span>'; }).join('');
+  return '<nav class="crumbs" aria-label="Breadcrumb">' + out + '<span aria-current="page" style="font-weight:600;color:var(--ink)">' + esc(labelOf(S)) + '</span></nav>';
+}
+function stat(l, v, sub, c) { return '<div class="stat"><span class="k-l">' + l + '</span><b class="' + (c || '') + '">' + v + '</b><span class="small muted">' + sub + '</span></div>'; }
+function fuList(list, showRep) {
+  return '<ul class="list">' + list.map(function (f) {
+    var c = byName(CUSTS, f.cust);
+    return '<li><div>' + (c ? A('customer', c.id, '<strong>' + esc(f.cust) + '</strong>', '', 'f-' + f.opp + f.type + f.cust) : '<strong>' + esc(f.cust) + '</strong>') + ' <span class="muted">· ' + esc(f.title) + '</span></div>' +
+      '<div class="small" style="color:#33414E">Opportunity ' + f.opp + ' · ' + f.type + ' · Due ' + f.due + ' (' + f.days + ' days overdue)</div>' +
+      (showRep ? '<div class="small muted">Advisor: ' + A('advisor-name', f.rep, esc(f.rep), '', 'fr-' + f.opp + f.type + f.rep) + '</div>' : '') + '</li>';
+  }).join('') + '</ul>';
+}
+function detailView() {
+  var title = labelOf(S), subtitle = '', body = '';
+  var sim = 'This is a simulated screen: it shows the fictional data and context of the demo, and does not represent a real product screen.';
+  if (S.view === 'customer') {
+    var c = byId(CUSTS, S.custId) || CUSTS[0], d = c.cur - c.prev;
+    subtitle = 'Customer of ' + BRANCH + ' · Segment: ' + c.seg;
+    var fu = FUPS.filter(function (f) { return f.cust === c.name; }).sort(function (a, b) { return b.days - a.days; });
+    body = '<div class="statrow">' + stat('Net sales YTD 2026', K(c.cur), 'Jan 1 – Nov 6, 2026') + stat('Same period 2025', K(c.prev), 'Jan 1 – Nov 6, 2025') + stat('Change', sK(d), sP(d / c.prev * 100) + ' · sales down', 'down') + stat('Last purchase', c.last, c.seg) + '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center">Advisor: ' + A('advisor-name', c.rep, esc(c.rep), ' style="min-height:44px;font-weight:600"', 'd-adv') + A('followups', byName(REPS, c.rep).id, 'View overdue follow-ups for ' + esc(c.rep), ' style="min-height:44px"', 'd-fu') + '</div>' +
+      '<p class="small muted">Sales are down versus the same dates in 2025; this does not confirm lost business.</p>' +
+      '<section class="card" aria-labelledby="cf-h"><h2 id="cf-h">Overdue follow-ups for this customer</h2>' + (fu.length ? fuList(fu, false) : '<p style="margin-top:8px">No overdue follow-ups. On track.</p>') + '</section>';
+  } else if (S.view === 'advisor') {
+    var r = byId(REPS, S.repId) || REPS[0], dr = r.cur - r.prev;
+    subtitle = 'Sales advisor · ' + BRANCH;
+    var mine = CUSTS.filter(function (x) { return x.rep === r.name; });
+    body = '<div class="statrow">' + stat('Net sales YTD', '$' + num(r.cur) + 'K', 'Jan 1 – Nov 6, 2026') + stat('Change vs 2025', sK(dr), sP(dr / r.prev * 100) + ' (2025: $' + num(r.prev) + 'K)', cls(dr)) +
+      stat('Overdue follow-ups', r.od === 0 ? '0 · on track' : String(r.od), r.od === 0 ? 'No overdue follow-ups' : 'in ' + r.opps + ' opportunit' + (r.opps === 1 ? 'y' : 'ies')) + '</div>' +
+      (r.od > 0 ? '<div><button type="button" class="btn" data-act="followups" data-arg="' + r.id + '" data-fk="d-fu2">View ' + r.od + ' overdue follow-up' + (r.od === 1 ? '' : 's') + ' →</button></div>' : '') +
+      '<section class="card" aria-labelledby="ac-h"><h2 id="ac-h">Declining accounts in this portfolio</h2><p class="small muted">Among the 5 largest declines shown on Home.</p>' +
+      (mine.length ? '<ul class="list">' + mine.map(function (x) { return '<li style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px;align-items:center">' + A('customer', x.id, esc(x.name), ' style="font-weight:600;min-height:44px"', 'ac-' + x.id) + '<span class="down">' + sK(x.cur - x.prev) + ' · ' + sP((x.cur - x.prev) / x.prev * 100) + '</span></li>'; }).join('') + '</ul>' : '<p style="margin-top:8px">None among the 5 accounts shown.</p>') + '</section>' +
+      '<p class="small muted">Changes compare sales credited to the advisor in each period and are not adjusted for account reassignment. A decline is a signal to investigate, not a judgment of performance.</p>';
+  } else if (S.view === 'followups') {
+    var rp = byId(REPS, S.fuRep);
+    title = rp ? 'Overdue follow-ups: ' + rp.name : 'Overdue follow-ups';
+    subtitle = rp ? 'Filtered by advisor. Change or clear the filter below.' : 'All Lakeshore advisors.';
+    var list = FUPS.filter(function (f) { return !rp || f.rep === rp.name; }).sort(function (a, b) { return b.days - a.days; });
+    var opps = {}; list.forEach(function (f) { opps[f.opp] = 1; });
+    var chips = [{ id: 'all', t: 'All (14)' }].concat(REPS.map(function (x) { return { id: x.id, t: x.name + ' (' + x.od + ')' }; })).map(function (c) {
+      return '<button type="button" class="btn" style="font-size:13px" aria-pressed="' + (S.fuRep === c.id) + '" data-act="fu-filter" data-arg="' + c.id + '" data-fk="fc-' + c.id + '">' + esc(c.t) + '</button>';
+    }).join('');
+    body = '<section class="card" aria-labelledby="ff-h"><h2 id="ff-h" style="font-size:15px">Filter by advisor <span class="muted" style="font-weight:400">(overdue in brackets)</span></h2><div class="chips" role="group" aria-label="Advisor filter" style="margin-top:8px">' + chips + '</div></section>' +
+      '<section class="card key" aria-labelledby="fl-h"><h2 id="fl-h">Follow-up list</h2><p role="status" class="muted">' + list.length + ' overdue follow-up' + (list.length === 1 ? '' : 's') + ' in ' + Object.keys(opps).length + ' opportunit' + (Object.keys(opps).length === 1 ? 'y' : 'ies') + '</p>' +
+      (list.length ? fuList(list, true) : '<p style="margin-top:10px">' + esc(rp ? rp.name : 'Lakeshore') + ' has no overdue follow-ups. On track.</p>') +
+      (rp ? '<div style="margin-top:8px"><button type="button" class="btn" data-act="fu-filter" data-arg="all" data-fk="fc-clear">Clear filter</button></div>' : '') + '</section>';
+  } else if (S.view === 'breakdown') {
+    var k = S.bd || 'brand', sel = S.bdSel || null, rows = '';
+    subtitle = k === 'brand' ? 'Lakeshore net sales YTD, change vs 2025 and share of Lakeshore vs the company. Diff = branch share minus company share, in pp.' : 'Share of net sales YTD, Lakeshore vs company. Diff = branch share minus company share, in pp.';
+    if (k === 'brand') {
+      rows = BRANDS.map(function (b) { return barRow(b[0], assign(brandOpts(b, false, 'brand', sel, false), { act: false })) + (b[0] === 'Other brands' ? BRAND_KIDS.map(function (c) { return barRow(c[0], assign(brandOpts(c, false, 'brand', sel, true), { act: false })); }).join('') : ''); }).join('');
+    } else {
+      var top = k === 'family' ? FAM : SEG, kids = k === 'family' ? FAM_KIDS : SEG_KIDS;
+      rows = top.map(function (t) { return barRow(t[0], { branch: t[1], co: t[2], sel: sel === t[0], act: false }) + (t[0] === 'Other' ? kids.map(function (c) { return barRow(c[0], { branch: c[1], co: c[2], sel: sel === c[0], act: false, child: true }); }).join('') : ''); }).join('');
+    }
+    body = '<section class="card" aria-label="Full breakdown">' + legend() + '<ul class="mix">' + rows + '</ul><p class="small muted" style="margin-top:10px">Indented rows break down “Other”.</p>' + (k === 'segment' ? segNote() : '') + '</section>';
+  } else if (S.view === 'sim') {
+    subtitle = 'Simulated destination';
+    body = '<section class="card"><p>' + esc(S.simBody || SIM_BODY) + '</p>' +
+      (S.simKind === 'clients' ? '<h2 style="font-size:15px;margin-top:12px">Accounts with a simulated detail view</h2><ul class="list">' + CUSTS.map(function (x) { return '<li>' + A('customer', x.id, '<strong>' + esc(x.name) + '</strong>', ' style="min-height:44px"', 'sc-' + x.id) + ' <span class="down small">' + sK(x.cur - x.prev) + ' · ' + sP((x.cur - x.prev) / x.prev * 100) + '</span></li>'; }).join('') + '</ul>' : '') + '</section>';
+  }
+  var prevLabel = S.stack.length ? (S.stack[S.stack.length - 1].label || 'Home') : 'Home';
+  return crumbsHtml() + '<div><h1 id="view-title" tabindex="-1">' + esc(title) + '</h1><p class="sub">' + esc(subtitle) + '</p>' + ctxBar() + '</div>' +
+    '<div class="demo-box"><strong style="color:var(--ink)">Simulated view.</strong> ' + (S.view === 'sim' ? esc(S.simBody || SIM_BODY) : sim) + '</div>' + (S.view === 'sim' ? (S.simKind === 'clients' ? body : '') : body) +
+    '<div><button type="button" class="btn" data-act="back" data-fk="back"><span aria-hidden="true">←</span> Back to ' + esc(prevLabel) + '</button></div>';
+}
+
+/* ---------------- render ---------------- */
+var app = document.getElementById('app'), live = document.getElementById('live');
+var lastLabel = '';
+function render() {
+  var act = document.activeElement, fk = act && act.getAttribute ? act.getAttribute('data-fk') : null;
+  var y = window.scrollY;
+  app.innerHTML = '<div class="shell">' + sidebar() + '<div class="col"><div class="topbar"><div class="brand"><span class="mark" aria-hidden="true">LS</span><b>Larkspur Supply</b></div>' +
+    '<button type="button" class="btn" aria-expanded="' + S.menuOpen + '" aria-controls="side" data-act="menu" data-fk="menu">' + (S.menuOpen ? '✕' : '≡') + ' Menu</button></div>' +
+    '<main id="main">' + (S.view === 'home' ? home() : detailView()) + '</main></div></div>';
+  var lbl = labelOf(S);
+  if (S.focusTitle) {
+    var t = document.getElementById('view-title'); if (t) t.focus({ preventScroll: true });
+    window.scrollTo(0, S.scrollTo || 0); S.focusTitle = false; S.scrollTo = 0; S.scrollTop = false;
+    live.textContent = 'Now showing: ' + lbl;
+  } else {
+    window.scrollTo(0, y);
+    if (fk) { var el = app.querySelector('[data-fk="' + fk.replace(/"/g, '\\"') + '"]'); if (el) el.focus({ preventScroll: true }); }
+  }
+  lastLabel = lbl;
+}
+
+/* ---------------- events ---------------- */
+var ACTS = {
+  'nav-home': function () { navHome(); },
+  'nav': function (a) { navTo(a, false); },
+  'nav-tool': function (a) { navTo(a, true); },
+  'tools': function () { S.toolsOpen = !S.toolsOpen; render(); },
+  'menu': function () { S.menuOpen = !S.menuOpen; render(); },
+  'ai': function () { S.aiOpen = !S.aiOpen; render(); },
+  'sort': function (k) {
+    var def = { sales: 'desc', delta: 'asc', pct: 'asc', overdue: 'desc' };
+    if (S.sortKey === k) S.sortDir = S.sortDir === 'asc' ? 'desc' : 'asc'; else { S.sortKey = k; S.sortDir = def[k]; }
+    render();
+  },
+  'month': function (i) { S.month = +i; render(); },
+  'table': function () { S.table = !S.table; render(); },
+  'customer': function (id) { go({ view: 'customer', custId: id }); },
+  'advisor': function (id) { go({ view: 'advisor', repId: id }); },
+  'advisor-name': function (n) { var r = byName(REPS, n); if (r) go({ view: 'advisor', repId: r.id }); },
+  'followups': function (id) { go({ view: 'followups', fuRep: id }); },
+  'fu-filter': function (id) { S.fuRep = id; render(); },
+  'breakdown': function (a) { var p = a.split('|'); go({ view: 'breakdown', bd: p[0], bdSel: p[1] || null }); },
+  'sim': function (t) {
+    var body = t === 'Branch and period' ? 'Here you would change the branch or the reporting period. In this demo they stay fixed: Lakeshore Branch, year to date (Jan 1 – Nov 6, 2026 vs Jan 1 – Nov 6, 2025).' :
+      t === 'Declining customers (18)' ? 'The full list of the 18 Lakeshore accounts with declining sales, ranked by absolute decline. In this demo only the five largest have a simulated detail view.' :
+      'The list of the 214 Lakeshore customers with purchases in the period. In this demo only the five largest declining accounts have a simulated detail view.';
+    go({ view: 'sim', simTitle: t, simBody: body, simKind: t === 'Branch and period' ? 'p' : 'clients' });
+  },
+  'crumb': function (i) { popTo(+i); },
+  'back': function () { popTo(S.stack.length - 1); }
+};
+document.addEventListener('click', function (e) {
+  var el = e.target.closest ? e.target.closest('[data-act]') : null;
+  if (!el) return;
+  var f = ACTS[el.getAttribute('data-act')]; if (f) f(el.getAttribute('data-arg'));
+});
+document.addEventListener('keydown', function (e) {
+  var t = e.target;
+  if (t && t.classList && t.classList.contains('mb') && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+    e.preventDefault();
+    var i = +t.getAttribute('data-arg') + (e.key === 'ArrowRight' ? 1 : -1);
+    if (i < 0 || i > MONTHS.length - 1) return;
+    S.month = i; render();
+    var n = app.querySelector('[data-fk="m-' + i + '"]'); if (n) n.focus({ preventScroll: true });
+  }
+  if (e.key === 'Escape' && S.menuOpen) { S.menuOpen = false; render(); var m = app.querySelector('[data-fk="menu"]'); if (m) m.focus(); }
+});
+render();
+})();
+</script>
+</body>
+</html>
